@@ -14,69 +14,6 @@
 </head>
 
 <body class="font mainBackground">
-    <button id="logOutBtn" class="hide" onclick="signout()">Sign Out</button>
-    <div id="rcorners1" class="center">
-        <p>Login</p>
-        <div id="rcorners2" class="center">
-            <p>Name</p>
-            <input id="stuName" placeholder="Name...">
-            <p>Password</p>
-            <input style="-webkit-text-security: circle" id="stuPass" class="center" placeholder="Password..." type="secret">
-            <br /><br />
-        </div> 
-        <br /><br />
-        <button id="loginBtn" class="button button1" onclick="userLogin()">Login</button>
-        <button id="signupBtn" class="button button1" onclick="postStudent()">Sign Up</button>
-        
-    </div>
-    <div id="postSignIn" class="hide">
-        <div class="center">
-            <button class="button button1" onclick="openMyCourses()">See All My Courses</button> <!-- myModal -->
-            <br />
-            <button class="button button1"onclick="openAllCourses()" onclick="openAllCourses()">See All Courses</button>
-            <br />
-            <button class="button button1"onclick="openRegistrationCourses()">Register For Courses</button>
-        </div>
-
-    </div>
-    <!-- See my Courses -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-          <span class="close" onclick="closeMyCourses()">&times;</span>
-          <body>
-            <h1>All My Courses</h1>
-        </body>
-          <div id="resultAll">
-
-          </div>
-        </div>
-    </div>
-    <!-- See all courses -->
-    <div id="allCoursesModal" class="modal">
-        <div class="modal-content">
-          <span class="close" onclick="closeMyCourses()">&times;</span>
-          <body>
-            <h1>All Courses</h1>
-            <body>
-          <div id="resultAllCourses">
-
-          </div>
-        </div>
-    </div>
-
-    <div id="registerCoursesModal" class="modal">
-        <div class="modal-content">
-          <span class="close" onclick="closeMyCourses()">&times;</span>
-          <body>
-            <h1>Register for Courses</h1>
-            <body>
-          <div id="resultRegisterCourses">
-
-          </div>
-        </div>
-    </div>
-
-
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
