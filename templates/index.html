@@ -7,7 +7,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
+    <title>Login | Threadsagram</title>
     <!-- <link rel="stylesheet" href="/Lab 6/static/css/styles.css"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
@@ -21,7 +21,7 @@
     <input id="inputPassword" class="spacing" placeholder="Password" />
 
     <button id="signupBtn" class="spacing" onclick="signup()">Sign up</button>
-    <button id="loginBtn" class="spacing">Log in</button>
+    <button id="loginBtn" class="spacing" onclick="login()">Log in</button>
 
   </div>
     <script src="{{ url_for('static', filename='main.js') }}"></script>

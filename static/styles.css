@@ -34,3 +34,14 @@ button:hover{
     background-color: #d4a373;
     cursor:pointer;
 }
+
+.uploadMainDiv{
+    background-color: #aac7b4;
+    width: 500px;
+    height: 500px;
+    border-radius: 1rem;
+}
+
+.pad{
+    padding: 10px;
+}
