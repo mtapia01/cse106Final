@@ -21,19 +21,17 @@ async function renderPost(){
             console.error('Invalid response format:', responseData);
             return;
         }
-        console.log("Posts: ", postsData)
         let postArea = document.getElementById('posts-container');
         postsData.forEach(post => {
             const postElement = document.createElement("div");
             const imagePath = post.image
-            // postElement.classList.add("post");
+
             postElement.insertAdjacentHTML('beforeend', `
                 <div>
-                    <span>${post.user}</span>
-                    <p>${post.content}</p>
-
-                    ${post.image ? `<img src="${imagePath}" alt="Post Image">` : ''}
-                    <small>${post.date_posted}</small>
+                    <span>@${post.user}</span> <br />
+                    ${post.image ? `<img src="${imagePath}" alt="Post Image" width="200px" height="200px">` : ''} <br />
+                    <small>${post.date_posted}</small> <br />  
+                    <p>Caption: ${post.content}</p>
                     <ul>
                         comments go here
                     </ul>
@@ -86,7 +84,8 @@ async function uploadPost() {
             method: 'POST',
             body: formData
         });
-
+        alert("Posted created!")
+        form.reset();
         const data = await response.json(); // Adjust as needed
         
     } catch (error) {

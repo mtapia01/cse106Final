@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session,send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
@@ -102,6 +102,10 @@ def feed():
 @login_required
 def create_post_form():
     return render_template('upload.html')
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -222,7 +226,7 @@ def dashboardFeed():
                 'content': post.content,
                 'image': post.image,
                 'date_posted': post.date_posted,
-                'user': userName
+                'user': User.query.get(post.user_id).username
             }
             for post in posts
         ]

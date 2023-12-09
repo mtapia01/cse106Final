@@ -42,6 +42,12 @@ button:hover{
     border-radius: 1rem;
 }
 
+p{
+    padding: 5px;
+    font-style: italic;
+    font-size: small;
+}
+
 .pad{
     padding: 10px;
 }
