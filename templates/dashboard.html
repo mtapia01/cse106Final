@@ -4,13 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Threadsagram</title>
-</head>
-<body>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
-<h3>Your Posts:</h3>
+</head>
+<body class="fontMain" style="background-color: #faedcd;">
+
+<!-- <h3>Your Posts:</h3> -->
+    <br /><br /><br /><br /><br /><br /><br />
+    <h1 class="center indent"> Your Threadsagram Dashboard</h1>
+    <Br></Br>
+    <div class="center downPadding" id="rcorners1">
+        <button class="center pad spacing" onclick="redirectFeed()">View Feed</button>
+        <br /><br /><br />
+        <button class="center" onclick="redirectUpload()">Create a Post</button>
+    </div>
 
 <!-- Container to hold dynamically generated posts -->
-<div id="posts-container" onload="renderPosts()"></div>
+<!-- <div id="posts-container" onload="renderPosts()"></div> -->
 
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>

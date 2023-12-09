@@ -1,97 +1,70 @@
- // Sample data - replace this with your actual data fetching logic
-//  const userData = {
-//     posts: [
-//         {
-//             id: 1,
-//             content: "Post Content 1",
-//             image: "post_image_1.jpg",
-//             date_posted: "2023-01-01 12:34:56",
-//             comments: [
-//                 { content: "Comment 1", date_posted: "2023-01-02 08:45:30" },
-//                 { content: "Comment 2", date_posted: "2023-01-03 14:22:18" }
-//             ]
-//         },
-//         {
-//             id: 2,
-//             content: "Post Content 2",
-//             image: "post_image_2.jpg",
-//             date_posted: "2023-01-05 18:12:45",
-//             comments: [
-//                 { content: "Comment 3", date_posted: "2023-01-07 09:20:10" }
-//                 // Additional comments for post 2
-//             ]
-//         }
-//         // Additional posts
-//     ]
-// };
+// Next steps: Work on feed. Add a sign out button and create post maybe at the top of the page as a nav bar?
 
-// Function to render posts
-async function renderPosts() {
-    // console.log("loading")
-    const postsContainer = document.getElementById("posts-container");
-
+window.onload = renderPost();
+async function renderPost(){
     try {
-        const response = await fetch('/dashboardFeed');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        // Submit the form
+        const response = await fetch('/dashboardFeed', {
+            method: 'GET',
+        });
+        const responseData = await response.json();
+
+        let postsData = [];
+
+        if (Array.isArray(responseData)) {
+            // If responseData is an array, use it directly
+            postsData = responseData;
+        } else if (typeof responseData === 'object' && responseData.posts) {
+            // If responseData is an object with a 'posts' property, assume it's the array
+            postsData = responseData.posts;
+        } else {
+            console.error('Invalid response format:', responseData);
+            return;
         }
-
-        const postsData = await response.json();
-
+        console.log("Posts: ", postsData)
+        let postArea = document.getElementById('posts-container');
         postsData.forEach(post => {
             const postElement = document.createElement("div");
-            postElement.classList.add("post");
+            const imagePath = post.image
+            // postElement.classList.add("post");
+            postElement.insertAdjacentHTML('beforeend', `
+                <div>
+                    <span>${post.user}</span>
+                    <p>${post.content}</p>
 
-            postElement.innerHTML = `
-                <p>${post.content}</p>
-                ${post.image ? `<img src="${post.image}" alt="Post Image">` : ''}
-                <small>${post.date_posted}</small>
-                <ul>
-                    ${post.comments.map(comment => `<li>${comment.content} - ${comment.date_posted}</li>`).join('')}
-                </ul>
-                <form onsubmit="addComment(${post.id}); return false;">
-                    <label for="comment">Add Comment:</label>
-                    <input type="text" name="comment" required>
-                    <button type="submit">Post Comment</button>
-                </form>
-                <hr>
-            `;
-
-            postsContainer.appendChild(postElement);
+                    ${post.image ? `<img src="${imagePath}" alt="Post Image">` : ''}
+                    <small>${post.date_posted}</small>
+                    <ul>
+                        comments go here
+                    </ul>
+                    <form onsubmit="addComment(${post.id}); return false;">
+                        <label for="comment">Add Comment:</label>
+                        <input type="text" name="comment" required>
+                        <button type="submit">Post Comment</button>
+                    </form>
+                    <hr>
+                </div>
+            `);
+            postArea.appendChild(postElement);
         });
+
+
+        
     } catch (error) {
-        console.error('Error fetching and rendering posts:', error.message);
+        console.error('Error:', error); // Adjust as needed
     }
 }
-window.onload = renderPosts();
-// function renderPosts() {
-//     const postsContainer = document.getElementById("posts-container");
 
-//     userData.posts.forEach(post => {
-//         const postElement = document.createElement("div");
-//         postElement.classList.add("post");
+function redirectUpload(){
+    window.location.href = '/create-post';
+}
 
-//         postElement.innerHTML = `
-//             <p>${post.content}</p>
-//             ${post.image ? `<img src="${post.image}" alt="Post Image">` : ''}
-//             <small>${post.date_posted}</small>
-//             <ul>
-//                 ${post.comments.map(comment => `<li>${comment.content} - ${comment.date_posted}</li>`).join('')}
-//             </ul>
-//             <form onsubmit="addComment(${post.id}); return false;">
-//                 <label for="comment">Add Comment:</label>
-//                 <input type="text" name="comment" required>
-//                 <button type="submit">Post Comment</button>
-//             </form>
-//             <hr>
-//         `;
-
-//         postsContainer.appendChild(postElement);
-//     });
-// }
+function redirectFeed(){
+    window.location.href = '/feed';
+}
 
 async function uploadPost() {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
 
     try {
         // Get the file input and its properties
@@ -99,7 +72,7 @@ async function uploadPost() {
         const file = fileInput.files[0];
         
         // Generate a new filename using the user's id and time of day
-        const userId = await getUserId(); // Wait for getUserId to complete
+        const userId = await getUserId(); 
         const timestamp = Date.now();
         const newFilename = `${userId}_${timestamp}${getFileExtension(file.name)}`;
 
@@ -115,7 +88,7 @@ async function uploadPost() {
         });
 
         const data = await response.json(); // Adjust as needed
-        console.log(data); // Adjust as needed
+        
     } catch (error) {
         console.error('Error:', error); // Adjust as needed
     }
@@ -126,7 +99,7 @@ function getFileExtension(filename) {
     return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
 }
 
-// Replace this function with your actual function to get the user's id
+
 function getUserId() {
     fetch('/get_current_user')
         .then(response => response.json())
@@ -159,7 +132,7 @@ function addComment(postId) {
     // You can implement the actual logic to send the comment to the server here
 }
 
-renderPosts();
+// renderPosts();
 
 async function signup() {
     // console.log(document.getElementById('signupUsername').value)

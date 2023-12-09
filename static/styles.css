@@ -45,3 +45,11 @@ button:hover{
 .pad{
     padding: 10px;
 }
+.indent{
+    padding-left: 13%;
+    /* align-items: center; */
+}
+.downPadding{
+    padding: 50px;
+    
+}

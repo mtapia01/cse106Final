@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitsagram</title>
+</head>
+<body>
+
+<h3>Your Posts:</h3>
+
+<!-- Container to hold dynamically generated posts -->
+<div id="posts-container" onload="renderPosts()"></div>
+
+
+<script>
+    // Define the base URL for the images
+    const baseUrl = "{{ url_for('static', filename='') }}";
+
+    // Load posts and render them
+    renderPosts();
+</script>
+
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</body>
+</html>

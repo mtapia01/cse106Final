@@ -3,10 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 import os
 
 UPLOAD_FOLDER = 'uploads'
+
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -18,8 +20,10 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login' 
 app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png'}
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = './uploads/'
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png', 'gif'}
 
 
 
@@ -59,6 +63,8 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     # posts = db.relationship('Post', backref='author', lazy=True)
 
+    def get_id(self):
+        return str(self.id)  # Assuming `id` is your user ID field
     #hashes password with salt
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -85,12 +91,21 @@ with app.app_context():
 def index():
     return render_template('index.html')
 @app.route('/dashboard')
+@login_required
 def dashboard():
     return render_template('dashboard.html')
-
+@app.route('/feed')
+@login_required
+def feed():
+    return render_template('/feed.html')
 @app.route('/create-post')
+@login_required
 def create_post_form():
     return render_template('upload.html')
+
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
 
 # Functions
 @app.route('/create_post', methods=['POST'])
@@ -104,20 +119,28 @@ def create_post():
 
     # Check if the file is allowed
     if picture and allowed_file(picture.filename):
-        # Save the picture to the server's static folder
-        picture_path = os.path.join(app.config['UPLOAD_FOLDER'], picture.filename)
-        picture.save(picture_path)
+        try:
+            # Generate a unique filename with timestamp
+            timestamp = datetime.now().strftime('%Y%m%d%H')
+            unique_filename = f"{timestamp}_{secure_filename(picture.filename)}"
+            # picture_path = os.path.join(app.config['UPLOAD_FOLDER'], picture.filename)
+            picture_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
 
-        # Create a new Post instance and set its attributes
-        new_post = Post(content=content, image=picture.filename, user_id=user_id)
+            # Save the picture to the server's static folder
+            picture.save(picture_path)
 
-        # Add and commit the new_post to the database
-        db.session.add(new_post)
-        db.session.commit()
+            # Create a new Post instance and set its attributes
+            new_post = Post(content=content, image=picture_path, user_id=user_id)
 
-        return jsonify({'message': 'Post created successfully'})
+            # Add and commit the new_post to the database
+            db.session.add(new_post)
+            db.session.commit()
 
-    return jsonify({'error': 'Invalid file format'})
+            return jsonify({'message': 'Post created successfully'})
+        except Exception as e:
+            return jsonify({'error': f'Error creating post: {str(e)}'})
+    else:
+        return jsonify({'error': 'Invalid file format'})
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -172,77 +195,40 @@ def login():
     else:
         # Invalid username or password
         return jsonify({'error': 'Invalid username or password'}), 401
-
-# @app.route('/login', methods=['POST'])
-# def login():
-#     data = request.get_json()
-#     username = data['username']
-#     password = data['password']
-
-#     #checking if all info is filled
-#     if 'username' not in data or 'password' not in data:
-#         return jsonify({'error': 'Username and password are required'}), 400
-    
-#     #checking if user is in the table
-#     user = User.query.filter_by(username=username).first()
-#     if user and user.check_password(password):
-#         login_user(user)
-#         session['user_id'] = user.id
-#         # Redirect the user to a new page after successful login
-#         return redirect(url_for('dashboard'))   
-#     else:
-#         return jsonify({'error': 'Invalid username or password'}), 401
     
 @app.route('/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     return jsonify({'message': 'Logout successful'}), 200
-
-# @app.route('/create_post', methods=['POST'])
-# def create_post():
-#     user_id = session.get('user_id')
-
-#     if user_id:
-#         current_user = User.query.get(user_id)
-#         content = request.form.get('content')
-#         picture = request.files.get('picture')
-
-#         new_post = Post(content=content, user_id=user_id)
-
-#         if picture:
-#             new_post.save_picture(picture)
-
-#         db.session.add(new_post)
-#         db.session.commit()
-
-#         return redirect(url_for('dashboard'))  # Redirect to the dashboard or any other page
-#     else:
-#         return jsonify({'error': 'User not authenticated'}), 401
     
 
 
 @app.route('/dashboardFeed', methods=['GET'])
+@login_required
 def dashboardFeed():
-    user_id = session.get('user_id')
+    user_id = session.get('_user_id')
 
+    # print('followed_user_ids:', followed_user_ids)
+    # print('feed_posts:', feed_posts)
+    userName = user_id
     if user_id:
-        current_user = User.query.get(user_id)
-        if current_user:
-            followed_user_ids = [user.id for user in current_user.followed]
-            feed_posts = []
+        # Retrieve all posts with the given user_id
+        posts = Post.query.filter_by(user_id=user_id).all()
+        # userName = User.query.filter_by(user_id=user_id).first()
 
-            for followed_user_id in followed_user_ids:
-                user = User.query.get(followed_user_id)
-                user_posts = user.posts.all()  # Assuming you have a relationship in your User model
-                feed_posts.extend(user_posts)
+        # Convert posts to a format that can be easily serialized to JSON
+        serialized_posts = [
+            {
+                'content': post.content,
+                'image': post.image,
+                'date_posted': post.date_posted,
+                'user': userName
+            }
+            for post in posts
+        ]
 
-            # Convert feed_posts to a format that can be easily serialized to JSON
-            serialized_posts = [
-                {'content': post.content, 'image': post.image, 'date_posted': post.date_posted}
-                for post in feed_posts
-            ]
+        return jsonify(serialized_posts)
 
-            return jsonify(serialized_posts)
 
     return jsonify({'error': 'User not authenticated'}), 401
 
