@@ -44,21 +44,39 @@ async function renderPost(){
                     </form>
                     ${deleteButton}
                     <button onclick="followUser(${post.user_id})">Follow this Author</button>
-                   
+                    <button id="like-count-${post.id}" onclick="likeButton(${post.id})">&#9829 (${post.likes || 0})</button>
                     <hr>
                 </div>
             `);
             postArea.appendChild(postElement);
 
             
-        });
-        
-
-
-        
+        });   
     } catch (error) {
         console.error('Error:', error); // Adjust as needed
     }
+}
+
+function likeButton(postId) {
+    // Make an AJAX request to the server
+    fetch('/like', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ postId: postId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        const likeCountElement = document.getElementById(`like-count-${postId}`);
+        if (likeCountElement) {
+            likeCountElement.textContent = data.likes;
+        }
+    })
+    .catch(error => {
+        console.error('Error liking post:', error);
+    });
 }
 
 function redirectUpload(){

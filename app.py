@@ -36,6 +36,7 @@ class Post(db.Model):
     image = db.Column(db.String(255))  # Store the file path or URL
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    likes = db.Column(db.Integer, nullable=False, default=0)  # Set default value to 0
 
     def __repr__(self):
         return f"Post('{self.content}', '{self.date_posted}')"
@@ -336,12 +337,15 @@ def dashboardFeed():
         serialized_posts = [
             {
                 'id': post.id,
+                'likes': post.likes if hasattr(post, 'likes') else 0, 
                 'content': post.content,
                 'image': post.image,
                 'date_posted': post.date_posted,
                 'user': User.query.get(post.user_id).username,
                 'comments': [{'content': comment.content, 'user': User.query.get(comment.user_id).username}
-                             for comment in post.comments]
+                             for comment in post.comments],
+
+                        
             }
             for post in posts
         ]
@@ -351,6 +355,25 @@ def dashboardFeed():
     except Exception as e:
         return jsonify({'error': f'Error fetching posts: {str(e)}'}), 500
 
+@app.route('/like', methods=['POST'])
+@login_required
+def like_post():
+    try:
+        data = request.get_json()
+        post_id = data.get('postId')
+        user_id = current_user.id
+
+        # Perform the necessary logic to update the likes for the post
+        post = Post.query.get(post_id)
+        post.likes += 1
+
+        # Save the changes to the database
+        db.session.commit()
+
+        # Return the updated like count in the response
+        return jsonify({'message': 'Post liked successfully', 'likes': post.likes})
+    except Exception as e:
+        return jsonify({'error': f'Error liking post: {str(e)}'})
 
 @app.route('/delete_post/<int:post_id>', methods=['POST'])
 @login_required
