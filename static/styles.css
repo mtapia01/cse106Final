@@ -59,3 +59,34 @@ p{
     padding: 50px;
     
 }
+
+/* CSS for navbar buttons
+/* Add this CSS to your stylesheet or style block */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: #6f432a;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 35px; /* Adjust the gap between buttons as needed */
+}
+
+.header-buttons:last-child {
+    margin-left: auto; /* Push the last set of buttons to the right by using auto margin */
+}
+
+/* Adjust padding and font size for buttons */
+.header-buttons button {
+    padding: 8px 14px; /* Adjust the padding as needed */
+    font-size: 14px; /* Adjust the font size as needed */
+    width: auto; /* Set the width to auto to allow natural width based on content */
+}
+
+.center {
+    margin: auto;
+    width: 50%;
+}

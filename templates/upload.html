@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<!-- dashboard.html -->
+
+{% include 'header.html' %}
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +17,6 @@
 
 <body class="fontMain " style="background-color: #faedcd;">
     <div class="center uploadMainDiv">
-        <button class="center" onclick="redirectDashboard()">Back to Dashboard</button>
         <h1 class="pad">Create a New Post</h1>
         <p class="pad">Tip: Best size is 200px x 200px</p>
         
@@ -31,7 +35,24 @@
         </form>
         
     </div>
-    
+    <script>
+        function redirectFeed() {
+            window.location.href = '/feed';
+        }
+
+        function redirectUpload() {
+            window.location.href = '/create-post';
+        }
+
+        function redirectFollowers() {
+            window.location.href = '/followers';
+        }
+
+        function signOut() {
+            // Add logic to sign out the user (e.g., make an API call to the server)
+            window.location.href = '/logout';  // Redirect to the logout route
+        }
+    </script>
 
     <script>
         function redirectDashboard() {
