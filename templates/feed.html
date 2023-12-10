@@ -7,8 +7,13 @@
     <title>Fitsagram</title>
 </head>
 
-<body>
 
+
+
+
+<body>
+    <button class="center" onclick="redirectDashboard()">Back to Dashboard</button>
+    
     <h3>Your Posts:</h3>
 
     <!-- Container to hold dynamically generated posts -->
@@ -23,18 +28,28 @@
             posts.forEach(post => {
                 const postDiv = document.createElement('div');
                 postDiv.innerHTML = `
-                    <h4>${post.user}</h4>
-                    <p>${post.content}</p>
-                    <img src="${post.image}" alt="post-image">
-                    <p>${post.date_posted}</p>
-                    <ul>
-                        ${post.comments.map(comment => `<li>${comment.user}: ${comment.content}</li>`).join('')}
-                    </ul>
+                    <div>
+                        <h4>${post.user}</h4>
+                        <p>${post.content}</p>
+                        <img src="${post.image}" alt="post-image">
+                        <p>${post.date_posted}</p>
+                        <ul>
+                            ${post.comments.map(comment => `<li>${comment.user}: ${comment.content}</li>`).join('')}
+                        </ul>
+                        ${/* Add a button to follow/unfollow the user */ ''}
+                        ${current_user.id !== post.user_id ? `
+                            <button onclick="followUser(${user.id})">Follow</button>
+                        ` : ''}
+                    </div>
                 `;
                 document.getElementById('posts-container').appendChild(postDiv);
             });
         }
+        function redirectDashboard() {
+            window.location.href = '/dashboard';
+        }
     </script>
 </body>
+
 
 </html>

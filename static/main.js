@@ -1,6 +1,7 @@
 // Next steps: Work on feed. Add a sign out button and create post maybe at the top of the page as a nav bar?
 
 window.onload = renderPost;
+
 async function renderPost(){
     try {
         // Submit the form
@@ -40,6 +41,9 @@ async function renderPost(){
                         <input type="text" name="comment" required>
                         <button type="submit">Post Comment</button>
                     </form>
+                    
+                    <button onclick="followUser(${post.user_id})">Follow this Author</button>
+                   
                     <hr>
                 </div>
             `);
@@ -47,6 +51,7 @@ async function renderPost(){
 
             
         });
+        
 
 
         
@@ -245,4 +250,39 @@ async function userFeed(){
     .then(data => {
         document.getElementById("posts-container").append(data);
     })
+}
+
+// Inside main.js
+async function followUser(userId) {
+    try {
+        const response = await fetch(`/follow/${userId}`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // Reload the feed after following a user
+        renderPost();
+    } catch (error) {
+        console.error('Error following user:', error.message);
+    }
+}
+
+async function unfollowUser(userId) {
+    try {
+        const response = await fetch(`/unfollow/${userId}`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // Reload the feed after unfollowing a user
+        renderPost();
+    } catch (error) {
+        console.error('Error unfollowing user:', error.message);
+    }
 }

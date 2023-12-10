@@ -9,10 +9,13 @@
     </style>
     <title>Create Post</title>
 </head>
+
 <body class="fontMain " style="background-color: #faedcd;">
     <div class="center uploadMainDiv">
+        <button class="center" onclick="redirectDashboard()">Back to Dashboard</button>
         <h1 class="pad">Create a New Post</h1>
         <p class="pad">Tip: Best size is 200px x 200px</p>
+        
         <form id="postForm" class="pad" method="POST" action="/create_post" enctype="multipart/form-data">
             <label for="picture">Picture:</label>
             <input type="file" name="picture" accept=".jpg, .jpeg, .png">
@@ -24,9 +27,16 @@
             <br />
             <br />
             <button class="" type="submit" onclick="uploadPost()">Create Post</button>
+            
         </form>
+        
     </div>
     
 
+    <script>
+        function redirectDashboard() {
+            window.location.href = '/dashboard';
+        }
+    </script>
 </body>
 </html>

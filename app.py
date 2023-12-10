@@ -58,6 +58,8 @@ followers = db.Table(
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+
+
 #is_authenticated
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -79,6 +81,17 @@ class User(db.Model, UserMixin):
         secondaryjoin=(followers.c.followed_id == id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
     )
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+
+    def is_following(self, user):
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
     
     
 class Comment(db.Model):
@@ -167,6 +180,12 @@ def create_post():
         return jsonify({'error': 'Invalid file format'})
     
     
+@app.route('/followers')
+@login_required
+def followers():
+    # Add logic to fetch and display followers information
+    return render_template('followers.html')
+    
 @app.route('/add_comment', methods=['POST'])
 @login_required
 def add_comment():
@@ -189,29 +208,34 @@ def add_comment():
 
 
 
-@app.route('/signup', methods=['POST'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    data = request.get_json()
-    username = data['username']
-    password = data['password']
+    if request.method == 'POST':
+        # Handle user registration logic
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
 
-    # checking if all info is filled
-    if 'username' not in data or 'password' not in data:
-        return jsonify({'error': 'Username and password are required'}), 400
+        # checking if all info is filled
+        if 'username' not in data or 'password' not in data:
+            return jsonify({'error': 'Username and password are required'}), 400
 
-    # checking if user is in the table
-    existing_user = User.query.filter_by(username=username).first()
-    if existing_user:
-        return jsonify({'error': 'Username is already taken'}), 400
+        # checking if user is in the table
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return jsonify({'error': 'Username is already taken'}), 400
 
-    # Create a new user
-    hashed_password = generate_password_hash(password)
-    new_user = User(username=username, password=hashed_password)
+        # Create a new user
+        hashed_password = generate_password_hash(password)
+        new_user = User(username=username, password=hashed_password)
 
-    db.session.add(new_user)
-    db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
-    return jsonify({'message': 'Signup successful', 'user': {'username': new_user.username}}), 201
+        return jsonify({'message': 'Signup successful', 'user': {'username': new_user.username}}), 201
+
+    # If it's a GET request, render the sign-up page
+    return render_template('signup.html')
 
 
 @app.route('/get_current_user', methods=['GET'])
@@ -243,44 +267,89 @@ def login():
         # Invalid username or password
         return jsonify({'error': 'Invalid username or password'}), 401
     
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.pop('user_id', None)
-    return jsonify({'message': 'Logout successful'}), 200
+
     
+@app.route('/logout', methods=['GET'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))  # Redirect to the home page or another appropriate page
+
+@app.route('/follow/<int:user_id>', methods=['POST'])
+@login_required
+def follow_user(user_id):
+    user_to_follow = User.query.get(user_id)
+    
+    if not user_to_follow:
+        return jsonify({'error': 'User not found'}), 404
+
+    if current_user.is_following(user_to_follow):
+        return jsonify({'error': 'Already following this user'}), 400
+
+    current_user.follow(user_to_follow)
+    db.session.commit()
+    
+    return jsonify({'message': f'You are now following {user_to_follow.username}'})
+
+
+@app.route('/unfollow/<int:user_id>', methods=['POST'])
+@login_required
+def unfollow_user(user_id):
+    user_to_unfollow = User.query.get(user_id)
+
+    if not user_to_unfollow:
+        return jsonify({'error': 'User not found'}), 404
+
+    if not current_user.is_following(user_to_unfollow):
+        return jsonify({'error': 'You are not following this user'}), 400
+
+    current_user.unfollow(user_to_unfollow)
+    db.session.commit()
+    
+    return jsonify({'message': f'You have unfollowed {user_to_unfollow.username}'})
+
+
+@app.route('/get_followers', methods=['GET'])
+@login_required
+def get_followers():
+    try:
+        following = current_user.followed.all()
+        followers = current_user.followers.all()
+
+        following_data = [{'id': user.id, 'username': user.username} for user in following]
+        followers_data = [{'id': user.id, 'username': user.username} for user in followers]
+
+        return jsonify({'following': following_data, 'followers': followers_data})
+
+    except Exception as e:
+        return jsonify({'error': f'Error fetching followers: {str(e)}'}), 500
 
 
 @app.route('/dashboardFeed', methods=['GET'])
 @login_required
 def dashboardFeed():
-    user_id = current_user.id
-
-    # print('followed_user_ids:', followed_user_ids)
-    # print('feed_posts:', feed_posts)
-    userName = user_id
-    if user_id:
-        # Retrieve all posts with the given user_id
-        posts = Post.query.filter_by(user_id=user_id).all()
-        # userName = User.query.filter_by(user_id=user_id).first()
+    try:
+        # Retrieve all posts, not just those of the authenticated user
+        posts = Post.query.all()
 
         # Convert posts to a format that can be easily serialized to JSON
         serialized_posts = [
-        {
-            'id': post.id,
-            'content': post.content,
-            'image': post.image,
-            'date_posted': post.date_posted,
-            'user': User.query.get(post.user_id).username,
-            'comments': [{'content': comment.content, 'user': User.query.get(comment.user_id).username}
-                         for comment in post.comments]
-        }
-        for post in posts
-    ]
+            {
+                'id': post.id,
+                'content': post.content,
+                'image': post.image,
+                'date_posted': post.date_posted,
+                'user': User.query.get(post.user_id).username,
+                'comments': [{'content': comment.content, 'user': User.query.get(comment.user_id).username}
+                             for comment in post.comments]
+            }
+            for post in posts
+        ]
 
         return jsonify(serialized_posts)
 
-
-    return jsonify({'error': 'User not authenticated'}), 401
+    except Exception as e:
+        return jsonify({'error': f'Error fetching posts: {str(e)}'}), 500
 
 
 @app.route('/delete_post/<int:post_id>', methods=['POST'])
