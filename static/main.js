@@ -1,6 +1,7 @@
 // Next steps: Work on feed. Add a sign out button and create post maybe at the top of the page as a nav bar?
 
-window.onload = renderPost();
+window.onload = renderPost;
+
 async function renderPost(){
     try {
         // Submit the form
@@ -24,27 +25,34 @@ async function renderPost(){
         let postArea = document.getElementById('posts-container');
         postsData.forEach(post => {
             const postElement = document.createElement("div");
-            const imagePath = post.image
-
+            const imagePath = post.image;
+            const deleteButton = `<button onclick="deletePost(${post.id})">Delete</button>`;
+        
             postElement.insertAdjacentHTML('beforeend', `
-                <div>
+                <div id="post-${post.id}">
                     <span>@${post.user}</span> <br />
                     ${post.image ? `<img src="${imagePath}" alt="Post Image" width="200px" height="200px">` : ''} <br />
                     <small>${post.date_posted}</small> <br />  
                     <p>Caption: ${post.content}</p>
                     <ul>
-                        comments go here
+                        ${post.comments.map(comment => `<li>${comment.user}: ${comment.content}</li>`).join('')}
                     </ul>
                     <form onsubmit="addComment(${post.id}); return false;">
                         <label for="comment">Add Comment:</label>
                         <input type="text" name="comment" required>
                         <button type="submit">Post Comment</button>
                     </form>
+                    ${deleteButton}
+                    <button onclick="followUser(${post.user_id})">Follow this Author</button>
+                   
                     <hr>
                 </div>
             `);
             postArea.appendChild(postElement);
+
+            
         });
+        
 
 
         
@@ -99,42 +107,76 @@ function getFileExtension(filename) {
 }
 
 
-function getUserId() {
-    fetch('/get_current_user')
-        .then(response => response.json())
-        .then(data => {
-            // Check if the response contains the user_id
-            if (data && data.user_id) {
-                return data.user_id;
-            } else {
-                console.error('Error retrieving user ID');
-                return null;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            return null;
-        });
+async function getUserId() {
+    try {
+        const response = await fetch('/get_current_user');
+        const data = await response.json();
 
+        if (data && data.user_id) {
+            return data.user_id;
+        } else {
+            console.error('Error retrieving user ID');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        return null;
+    }
 }
 
 
-// Function to add a comment (dummy function for illustration)
-function addComment(postId) {
+
+// Function to add a comment 
+async function addComment(postId) {
     const commentInput = document.querySelector(`[name="comment"]`);
     const commentContent = commentInput.value;
 
-    // Dummy logic to add the comment to the respective post
-    console.log(`Adding comment "${commentContent}" to post ${postId}`);
-    commentInput.value = '';  // Clear the input after adding the comment
+    try {
+        const response = await fetch('/add_comment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ post_id: postId, comment_content: commentContent }),
+        });
 
-    // You can implement the actual logic to send the comment to the server here
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // Update the UI to reflect the added comment
+        const commentList = document.querySelector(`#post-${postId} ul`);
+        commentList.insertAdjacentHTML('beforeend', `<li>${currentUserName}: ${commentContent}</li>`);
+
+        commentInput.value = '';  // Clear the input after adding the comment
+    } catch (error) {
+        console.error('Error adding comment:', error.message);
+    }
 }
 
-// renderPosts();
+
+async function deletePost(postId) {
+    try {
+        const response = await fetch(`/delete_post/${postId}`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // Remove the deleted post from the UI
+        const postElement = document.getElementById(`post-${postId}`);
+        postElement.remove();
+    } catch (error) {
+        console.error('Error deleting post:', error.message);
+    }
+}
+
+
+
 
 async function signup() {
-    // console.log(document.getElementById('signupUsername').value)
     const username = document.getElementById('inputUsername').value;
     const password = document.getElementById('inputPassword').value;
 
@@ -148,7 +190,8 @@ async function signup() {
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            const data = await response.json();
+            throw new Error(data.error || 'Signup failed');
         }
 
         const data = await response.json();
@@ -156,8 +199,11 @@ async function signup() {
         window.location.href = '/dashboard';
     } catch (error) {
         console.error('Error during signup:', error.message);
+        // Display the error message to the user
+        alert(error.message);
     }
 }
+
 
 async function login(){
     const username = document.getElementById('inputUsername').value;
@@ -205,4 +251,39 @@ async function userFeed(){
     .then(data => {
         document.getElementById("posts-container").append(data);
     })
+}
+
+// Inside main.js
+async function followUser(userId) {
+    try {
+        const response = await fetch(`/follow/${userId}`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // Reload the feed after following a user
+        renderPost();
+    } catch (error) {
+        console.error('Error following user:', error.message);
+    }
+}
+
+async function unfollowUser(userId) {
+    try {
+        const response = await fetch(`/unfollow/${userId}`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // Reload the feed after unfollowing a user
+        renderPost();
+    } catch (error) {
+        console.error('Error unfollowing user:', error.message);
+    }
 }
