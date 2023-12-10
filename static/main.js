@@ -26,6 +26,7 @@ async function renderPost(){
         postsData.forEach(post => {
             const postElement = document.createElement("div");
             const imagePath = post.image;
+            const deleteButton = `<button onclick="deletePost(${post.id})">Delete</button>`;
         
             postElement.insertAdjacentHTML('beforeend', `
                 <div id="post-${post.id}">
@@ -41,7 +42,7 @@ async function renderPost(){
                         <input type="text" name="comment" required>
                         <button type="submit">Post Comment</button>
                     </form>
-                    
+                    ${deleteButton}
                     <button onclick="followUser(${post.user_id})">Follow this Author</button>
                    
                     <hr>

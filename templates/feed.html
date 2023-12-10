@@ -7,13 +7,9 @@
     <title>Fitsagram</title>
 </head>
 
-
-
-
-
 <body>
     <button class="center" onclick="redirectDashboard()">Back to Dashboard</button>
-    
+
     <h3>Your Posts:</h3>
 
     <!-- Container to hold dynamically generated posts -->
@@ -27,6 +23,7 @@
             // Assuming posts is a global variable containing the serialized posts
             posts.forEach(post => {
                 const postDiv = document.createElement('div');
+                const deleteButton = (post.user_id === currentUserID) ? `<button onclick="deletePost(${post.id})">Delete</button>` : '';
                 postDiv.innerHTML = `
                     <div>
                         <h4>${post.user}</h4>
@@ -36,6 +33,7 @@
                         <ul>
                             ${post.comments.map(comment => `<li>${comment.user}: ${comment.content}</li>`).join('')}
                         </ul>
+                        ${deleteButton}
                         ${/* Add a button to follow/unfollow the user */ ''}
                         ${current_user.id !== post.user_id ? `
                             <button onclick="followUser(${user.id})">Follow</button>
@@ -45,11 +43,11 @@
                 document.getElementById('posts-container').appendChild(postDiv);
             });
         }
+
         function redirectDashboard() {
             window.location.href = '/dashboard';
         }
     </script>
 </body>
-
 
 </html>
