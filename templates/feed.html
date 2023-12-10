@@ -1,19 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitsagram</title>
 </head>
+
 <body>
 
-<h3>Your Posts:</h3>
+    <h3>Your Posts:</h3>
 
-<!-- Container to hold dynamically generated posts -->
-<div id="posts-container" onload="renderPosts()"></div>
+    <!-- Container to hold dynamically generated posts -->
+    <div id="posts-container" onload="renderPosts()"></div>
 
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
-<script src="{{ url_for('static', filename='main.js') }}"></script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function renderPosts() {
+            // Assuming posts is a global variable containing the serialized posts
+            posts.forEach(post => {
+                const postDiv = document.createElement('div');
+                postDiv.innerHTML = `
+                    <h4>${post.user}</h4>
+                    <p>${post.content}</p>
+                    <img src="${post.image}" alt="post-image">
+                    <p>${post.date_posted}</p>
+                    <ul>
+                        ${post.comments.map(comment => `<li>${comment.user}: ${comment.content}</li>`).join('')}
+                    </ul>
+                `;
+                document.getElementById('posts-container').appendChild(postDiv);
+            });
+        }
+    </script>
 </body>
+
 </html>
