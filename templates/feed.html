@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitsagram</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='feedStyles.css') }}">
 </head>
 
-<body>
-    <button class="center" onclick="redirectDashboard()">Back to Dashboard</button>
+<body class="fontMain center" style="background-color: #D7D6D6;">
+    <button class="" onclick="redirectDashboard()">Back to Dashboard</button>
 
     <h3>Your Posts:</h3>
 
@@ -18,7 +19,7 @@
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
-    <script>
+    <!-- <script>
         function renderPosts() {
             // Assuming posts is a global variable containing the serialized posts
             posts.forEach(post => {
@@ -47,7 +48,7 @@
         function redirectDashboard() {
             window.location.href = '/dashboard';
         }
-    </script>
+    </script> -->
 </body>
 
 </html>

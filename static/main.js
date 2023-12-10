@@ -29,23 +29,23 @@ async function renderPost(){
             const deleteButton = `<button onclick="deletePost(${post.id})">Delete</button>`;
         
             postElement.insertAdjacentHTML('beforeend', `
-                <div id="post-${post.id}">
+                <div id="post-${post.id}" class="postDiv">
                     <span>@${post.user}</span> <br />
                     ${post.image ? `<img src="${imagePath}" alt="Post Image" width="200px" height="200px">` : ''} <br />
                     <small>${post.date_posted}</small> <br />  
                     <p>Caption: ${post.content}</p>
                     <ul>
-                        ${post.comments.map(comment => `<li>${comment.user}: ${comment.content}</li>`).join('')}
+                        ${post.comments.map(comment => `<li class="commentDiv">${comment.user}: ${comment.content}</li>`).join('')}
                     </ul>
                     <form onsubmit="addComment(${post.id}); return false;">
                         <label for="comment">Add Comment:</label>
                         <input type="text" name="comment" required>
-                        <button type="submit">Post Comment</button>
+                        <button type="submit">Post</button>
                     </form>
                     ${deleteButton}
-                    <button onclick="followUser(${post.user_id})">Follow this Author</button>
+                    <button onclick="followUser(${post.user_id})">Follow</button>
                     <button id="like-count-${post.id}" onclick="likeButton(${post.id})">&#9829 (${post.likes || 0})</button>
-                    <hr>
+                    
                 </div>
             `);
             postArea.appendChild(postElement);
