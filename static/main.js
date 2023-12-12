@@ -392,3 +392,16 @@ async function userFeed(){
 //         console.error('Error unfollowing user:', error.message);
 //     }
 // }
+
+async function redirectDashboard(){
+    
+    try //sends user to dashboard
+    {
+    window.location.href = '/dashboard';
+    } 
+    catch (error) {
+    console.error('Error during signup:', error.message);
+    // Display the error message to the user
+    alert(error.message);
+    }
+}
