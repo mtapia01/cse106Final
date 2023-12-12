@@ -184,8 +184,10 @@ def create_post():
                 new_comment = Comment(content=comment_content, user_id=user_id, post_id=new_post.id)
                 db.session.add(new_comment)
 
-
-            return jsonify({'message': 'Post created successfully'})
+            flash("Post created successfully", "success")
+            
+            return redirect(url_for('feed'))
+            #jsonify({'message': 'Post created successfully'})
         except Exception as e:
             return jsonify({'error': f'Error creating post: {str(e)}'})
     else:
