@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session,send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session,send_from_directory, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-
+from PIL import Image
+from flask_migrate import Migrate
 import os
 
 UPLOAD_FOLDER = 'uploads'
@@ -21,6 +22,8 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login' 
 app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png'}
 app.config['UPLOAD_FOLDER'] = './uploads/'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+migrate = Migrate(app, db)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png', 'gif'}
@@ -76,6 +79,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    #profile_pic = db.Column(db.String(255), nullable=True, default='ValleHS-06.jpg')
     # posts = db.relationship('Post', backref='author', lazy=True)
 
     def get_id(self):
@@ -220,7 +224,32 @@ def add_comment():
     except Exception as e:
         return jsonify({'error': f'Error adding comment: {str(e)}'})
 
+@app.route('/get_followers', methods=['GET'])
+@login_required
+def get_followers():
+    try:
+        user_id = current_user.id
 
+        # Assuming you have a User model with a 'followed' relationship
+        user = User.query.filter_by(id=user_id).first()
+
+        following = user.followed.all()
+        followers = user.followers.all()
+
+        following_data = [{'id': u.id, 'username': u.username} for u in following]
+        followers_data = [{'id': u.id, 'username': u.username} for u in followers]
+
+        return jsonify({'following': following_data, 'followers': followers_data})
+
+    except Exception as e:
+        return jsonify({'error': f'Error fetching followers data: {str(e)}'}), 500
+    
+    
+@app.route('/profile')
+def profile():
+    # You can add logic here to fetch user information from the database
+    # and pass it to the template if needed.
+    return render_template('profile.html')  # Assuming your profile HTML file is named 'profile.html'
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():

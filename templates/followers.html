@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- dashboard.html -->
+<!-- followers.html -->
 
 {% include 'header.html' %}
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitsagram - Followers</title>
+    <title>Your App - Followers</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body class="fontMain" style="background-color: #faedcd;">
 
-    <h1 class="center indent">Your Fitsagram Followers</h1>
+    <h1 class="center indent">Your App Followers</h1>
     <br>
 
     <div class="center downPadding" id="followers-container">
@@ -31,40 +31,28 @@
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        function redirectFeed() {
-            window.location.href = '/feed';
-        }
-
-        function redirectUpload() {
-            window.location.href = '/create-post';
-        }
-
-        function redirectFollowers() {
-            window.location.href = '/followers';
-        }
-
-        function signOut() {
-            // Add logic to sign out the user (e.g., make an API call to the server)
-            window.location.href = '/logout';  // Redirect to the logout route
-        }
-    </script>
-    <script>
         window.onload = renderFollowers;
 
         async function renderFollowers() {
             try {
                 const response = await fetch('/get_followers');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch followers data');
+                }
+
                 const followersData = await response.json();
 
                 const followingList = document.getElementById('following-list');
                 const followersList = document.getElementById('followers-list');
 
+                // Display following
                 followersData.following.forEach(user => {
                     const listItem = document.createElement('li');
                     listItem.textContent = user.username;
                     followingList.appendChild(listItem);
                 });
 
+                // Display followers
                 followersData.followers.forEach(user => {
                     const listItem = document.createElement('li');
                     listItem.textContent = user.username;
