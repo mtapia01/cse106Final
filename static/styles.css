@@ -11,7 +11,7 @@
 }
 #rcorners1 {
     border-radius: 25px;
-    background-color: #aac7b4;
+    background-color: #BEB2C8;
     padding: 20px;
     width: 200px;
     height: 200px;
@@ -36,7 +36,7 @@ button:hover{
 }
 
 .uploadMainDiv{
-    background-color: #aac7b4;
+    background-color: #BEB2C8;
     width: 500px;
     height: 500px;
     border-radius: 1rem;

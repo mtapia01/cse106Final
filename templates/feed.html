@@ -16,39 +16,12 @@
     <!-- Container to hold dynamically generated posts -->
     <div id="posts-container" onload="renderPosts()"></div>
 
+    <h3>Explor Page:</h3>
+    <div id="explor-container" onload="renderExplor()"></div>
+
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
-    <!-- <script>
-        function renderPosts() {
-            // Assuming posts is a global variable containing the serialized posts
-            posts.forEach(post => {
-                const postDiv = document.createElement('div');
-                const deleteButton = (post.user_id === currentUserID) ? `<button onclick="deletePost(${post.id})">Delete</button>` : '';
-                postDiv.innerHTML = `
-                    <div>
-                        <h4>${post.user}</h4>
-                        <p>${post.content}</p>
-                        <img src="${post.image}" alt="post-image">
-                        <p>${post.date_posted}</p>
-                        <ul>
-                            ${post.comments.map(comment => `<li>${comment.user}: ${comment.content}</li>`).join('')}
-                        </ul>
-                        ${deleteButton}
-                        ${/* Add a button to follow/unfollow the user */ ''}
-                        ${current_user.id !== post.user_id ? `
-                            <button onclick="followUser(${user.id})">Follow</button>
-                        ` : ''}
-                    </div>
-                `;
-                document.getElementById('posts-container').appendChild(postDiv);
-            });
-        }
-
-        function redirectDashboard() {
-            window.location.href = '/dashboard';
-        }
-    </script> -->
 </body>
 
 </html>

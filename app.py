@@ -51,15 +51,25 @@ class Post(db.Model):
     
     comments = db.relationship('Comment', backref='post', lazy=True)
 
+class Follower(db.Model):
+    followee_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+
+    def __repr__(self):
+        return f"Followers('{self.followee_id}', '{self.follower_id}')"
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# class Follower(db.Model):
+#     user_account = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     follower = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 followers = db.Table(
     'followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-
 
 #is_authenticated
 class User(db.Model, UserMixin):
@@ -76,6 +86,7 @@ class User(db.Model, UserMixin):
     #checks hashed passwords
     def check_password(self, password):
         return check_password_hash(self.password, password)
+    
     followed = db.relationship(
         'User', secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -93,7 +104,6 @@ class User(db.Model, UserMixin):
 
     def is_following(self, user):
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
-    
     
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -132,6 +142,7 @@ def create_post_form():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# Used to link pictures to site
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
@@ -246,8 +257,6 @@ def get_current_user():
 
 @app.route('/login', methods=['POST'])
 def login():
-    # username = request.form.get('username')
-    # password = request.form.get('password')
 
     data = request.get_json()
     username = data['username']
@@ -261,7 +270,6 @@ def login():
 
     if user and user.check_password(password):
         # Login successful
-        # session['user_id'] = user.id
         login_user(user) 
         return jsonify({'message': 'Login successful', 'user': {'username': user.username}})
     else:
@@ -274,69 +282,69 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))  # Redirect to the home page or another appropriate page
+    return redirect(url_for('index')) 
 
-@app.route('/follow/<int:user_id>', methods=['POST'])
+@app.route('/followUser', methods=['POST'])
 @login_required
-def follow_user(user_id):
-    user_to_follow = User.query.get(user_id)
-    
-    if not user_to_follow:
-        return jsonify({'error': 'User not found'}), 404
-
-    if current_user.is_following(user_to_follow):
-        return jsonify({'error': 'Already following this user'}), 400
-
-    current_user.follow(user_to_follow)
-    db.session.commit()
-    
-    return jsonify({'message': f'You are now following {user_to_follow.username}'})
-
-
-@app.route('/unfollow/<int:user_id>', methods=['POST'])
-@login_required
-def unfollow_user(user_id):
-    user_to_unfollow = User.query.get(user_id)
-
-    if not user_to_unfollow:
-        return jsonify({'error': 'User not found'}), 404
-
-    if not current_user.is_following(user_to_unfollow):
-        return jsonify({'error': 'You are not following this user'}), 400
-
-    current_user.unfollow(user_to_unfollow)
-    db.session.commit()
-    
-    return jsonify({'message': f'You have unfollowed {user_to_unfollow.username}'})
-
-
-@app.route('/get_followers', methods=['GET'])
-@login_required
-def get_followers():
+def follow_user():
     try:
-        following = current_user.followed.all()
-        followers = current_user.followers.all()
+        data = request.get_json()
+        if current_user.is_authenticated:
+            follower_id = current_user.id
 
-        following_data = [{'id': user.id, 'username': user.username} for user in following]
-        followers_data = [{'id': user.id, 'username': user.username} for user in followers]
+        followee_id = data.get('followee')
 
-        return jsonify({'following': following_data, 'followers': followers_data})
+        # Check if the user is already following the followee
+        if not Follower.query.filter_by(followee_id=followee_id, follower_id=follower_id).first():
+
+            followers_relation = Follower(followee_id=followee_id, follower_id=follower_id)
+            db.session.add(followers_relation)
+
+            db.session.commit()
+
+            return jsonify({'message': 'User followed successfully'})
+        else:
+            return jsonify({'message': 'You are already following this user'})
 
     except Exception as e:
-        return jsonify({'error': f'Error fetching followers: {str(e)}'}), 500
-
-
-@app.route('/dashboardFeed', methods=['GET'])
+        return jsonify({'error': f'Error following user: {str(e)}'})
+    
+@app.route('/unfollow', methods=['POST'])
 @login_required
-def dashboardFeed():
+def unfollow_user():
     try:
-        # Retrieve all posts, not just those of the authenticated user
+        data = request.get_json()
+        if current_user.is_authenticated:
+            follower_id = current_user.id
+
+        followee_id = data.get('followee')
+
+        # Check if the user is already following the followee
+        if Follower.query.filter_by(followee_id=followee_id, follower_id=follower_id).first():
+            followers_relation = Follower.query.filter_by(followee_id=followee_id, follower_id=follower_id).first()
+            db.session.delete(followers_relation)
+
+            # Commit the changes
+            db.session.commit()
+
+            return jsonify({'message': 'User unfollowed successfully'})
+        else:
+            return jsonify({'message': 'You don\'t follow this user... yet'})
+
+    except Exception as e:
+        return jsonify({'error': f'Error unfollowing user: {str(e)}'})
+
+@app.route('/explorFeed', methods=['GET'])
+@login_required
+def explorFeed():
+    try:
         posts = Post.query.all()
 
-        # Convert posts to a format that can be easily serialized to JSON
+        # Convert posts to JSON
         serialized_posts = [
             {
                 'id': post.id,
+                'user_id': post.user_id,
                 'likes': post.likes if hasattr(post, 'likes') else 0, 
                 'content': post.content,
                 'image': post.image,
@@ -344,8 +352,6 @@ def dashboardFeed():
                 'user': User.query.get(post.user_id).username,
                 'comments': [{'content': comment.content, 'user': User.query.get(comment.user_id).username}
                              for comment in post.comments],
-
-                        
             }
             for post in posts
         ]
@@ -355,6 +361,40 @@ def dashboardFeed():
     except Exception as e:
         return jsonify({'error': f'Error fetching posts: {str(e)}'}), 500
 
+
+@app.route('/userFeed', methods=['GET'])
+@login_required
+def userFeed():
+    try:
+        # Retrieve posts from users that the current user is following using the Followers table
+        following_posts = (
+            Post.query.join(User, User.id == Post.user_id)
+            .join(Follower, Follower.followee_id == User.id)
+            .filter(Follower.follower_id == current_user.id)
+            .all()
+        )
+
+        # Convert posts JSON
+        serialized_posts = [
+            {
+                'id': post.id,
+                'user_id': post.user_id,
+                'likes': post.likes if hasattr(post, 'likes') else 0,
+                'content': post.content,
+                'image': post.image,
+                'date_posted': post.date_posted,
+                'user': User.query.get(post.user_id).username,
+                'comments': [{'content': comment.content, 'user': User.query.get(comment.user_id).username}
+                             for comment in post.comments],
+            }
+            for post in following_posts
+        ]
+
+        return jsonify(serialized_posts)
+
+    except Exception as e:
+        return jsonify({'error': f'Error fetching posts: {str(e)}'}), 500
+    
 @app.route('/like', methods=['POST'])
 @login_required
 def like_post():
@@ -363,14 +403,11 @@ def like_post():
         post_id = data.get('postId')
         user_id = current_user.id
 
-        # Perform the necessary logic to update the likes for the post
         post = Post.query.get(post_id)
         post.likes += 1
 
-        # Save the changes to the database
         db.session.commit()
 
-        # Return the updated like count in the response
         return jsonify({'message': 'Post liked successfully', 'likes': post.likes})
     except Exception as e:
         return jsonify({'error': f'Error liking post: {str(e)}'})

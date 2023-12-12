@@ -1,17 +1,64 @@
 // Next steps: Work on feed. Add a sign out button and create post maybe at the top of the page as a nav bar?
 
-window.onload = renderPost;
+// window.onload = renderPost;
+// window.onload = renderExplore;
 
-async function renderPost(){
+window.addEventListener('load', renderPost);
+window.addEventListener('load', renderExplore);
+//this is the id of the user we want to follow
+async function followUser(user_id){
+    // const newFollower = getUserId()
+    try {
+        const response = await fetch('/followUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ followee: user_id}),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        
+    } catch (error) {
+        console.error('Error adding comment:', error.message);
+    }
+}
+
+async function unfollowUser(user_id){
+    // const newFollower = getUserId()
+    try {
+        const response = await fetch('/unfollow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ followee: user_id}),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        
+    } catch (error) {
+        console.error('Error unfollowing:', error.message);
+    }
+}
+
+async function renderExplore(){
+    console.log("in explor")
+    window.onload = renderPost;
     try {
         // Submit the form
-        const response = await fetch('/dashboardFeed', {
+        const response = await fetch('/explorFeed', {
             method: 'GET',
         });
         const responseData = await response.json();
-
         let postsData = [];
-
+        
         if (Array.isArray(responseData)) {
             // If responseData is an array, use it directly
             postsData = responseData;
@@ -22,7 +69,8 @@ async function renderPost(){
             console.error('Invalid response format:', responseData);
             return;
         }
-        let postArea = document.getElementById('posts-container');
+        // console.log(postsData)
+        let postArea = document.getElementById('explor-container');
         postsData.forEach(post => {
             const postElement = document.createElement("div");
             const imagePath = post.image;
@@ -44,6 +92,63 @@ async function renderPost(){
                     </form>
                     ${deleteButton}
                     <button onclick="followUser(${post.user_id})">Follow</button>
+                    <button id="like-count-${post.id}" onclick="likeButton(${post.id})">&#9829 (${post.likes || 0})</button>
+                    
+                </div>
+            `);
+            postArea.appendChild(postElement);
+
+            
+        });   
+    } catch (error) {
+        console.error('Error:', error); // Adjust as needed
+    }
+}
+
+async function renderPost(){
+    try {
+        // Submit the form
+        const response = await fetch('/userFeed', {
+            method: 'GET',
+        });
+        const responseData = await response.json();
+
+        let postsData = [];
+
+        if (Array.isArray(responseData)) {
+            // If responseData is an array, use it directly
+            postsData = responseData;
+        } else if (typeof responseData === 'object' && responseData.posts) {
+            // If responseData is an object with a 'posts' property, assume it's the array
+            postsData = responseData.posts;
+        } else {
+            console.error('Invalid response format:', responseData);
+            return;
+        }
+        console.log("posts data here")
+        console.log(postsData)
+        let postArea = document.getElementById('posts-container');
+        postsData.forEach(post => {
+            const postElement = document.createElement("div");
+            const imagePath = post.image;
+            const deleteButton = `<button onclick="deletePost(${post.id})">Delete</button>`;
+        
+            postElement.insertAdjacentHTML('beforeend', `
+                <div id="post-${post.id}" class="postDiv">
+                    <span>@${post.user}</span> <br />
+                    ${post.image ? `<img src="${imagePath}" alt="Post Image" width="200px" height="200px">` : ''} <br />
+                    <small>${post.date_posted}</small> <br />  
+                    <p>Caption: ${post.content}</p>
+                    <ul>
+                        ${post.comments.map(comment => `<li class="commentDiv">${comment.user}: ${comment.content}</li>`).join('')}
+                    </ul>
+                    <form onsubmit="addComment(${post.id}); return false;">
+                        <label for="comment">Add Comment:</label>
+                        <input type="text" name="comment" required>
+                        <button type="submit">Post</button>
+                    </form>
+                    ${deleteButton}
+                    <button onclick="unfollowUser(${post.user_id})">Unfollow</button>
                     <button id="like-count-${post.id}" onclick="likeButton(${post.id})">&#9829 (${post.likes || 0})</button>
                     
                 </div>
@@ -271,37 +376,19 @@ async function userFeed(){
     })
 }
 
-// Inside main.js
-async function followUser(userId) {
-    try {
-        const response = await fetch(`/follow/${userId}`, {
-            method: 'POST',
-        });
+// async function unfollowUser(userId) {
+//     try {
+//         const response = await fetch(`/unfollow/${userId}`, {
+//             method: 'POST',
+//         });
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
+//         if (!response.ok) {
+//             throw new Error('Network response was not ok');
+//         }
 
-        // Reload the feed after following a user
-        renderPost();
-    } catch (error) {
-        console.error('Error following user:', error.message);
-    }
-}
-
-async function unfollowUser(userId) {
-    try {
-        const response = await fetch(`/unfollow/${userId}`, {
-            method: 'POST',
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        // Reload the feed after unfollowing a user
-        renderPost();
-    } catch (error) {
-        console.error('Error unfollowing user:', error.message);
-    }
-}
+//         // Reload the feed after unfollowing a user
+//         renderPost();
+//     } catch (error) {
+//         console.error('Error unfollowing user:', error.message);
+//     }
+// }
