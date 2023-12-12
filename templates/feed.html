@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
+    {% include 'header.html' %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitsagram</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='feedStyles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navbar.css') }}">
 </head>
 
-<body class="fontMain center" style="background-color: #D7D6D6;">
-    <button class="" onclick="redirectDashboard()">Back to Dashboard</button>
+<body class="fontMain" style="background-color: #D7D6D6;">
+    <!-- <button id="navbarButton" onclick="redirectDashboard()">Back to Dashboard</button> -->
 
-    <h3>Your Posts:</h3>
-
-    <!-- Container to hold dynamically generated posts -->
-    <div id="posts-container" onload="renderPosts()"></div>
-
-    <h3>Explor Page:</h3>
-    <div id="explor-container" onload="renderExplor()"></div>
+    <div class="center">
+        <h3>Your Posts:</h3>
+    
+        <!-- Container to hold dynamically generated posts -->
+        <div id="posts-container" onload="renderPosts()"></div>
+    
+        <h3>Explor Page:</h3>
+        <div id="explor-container" onload="renderExplor()"></div>
+    </div>
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>

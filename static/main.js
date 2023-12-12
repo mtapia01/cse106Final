@@ -88,7 +88,7 @@ async function renderExplore(){
                     <form onsubmit="addComment(${post.id}); return false;">
                         <label for="comment">Add Comment:</label>
                         <input type="text" name="comment" required>
-                        <button type="submit">Post</button>
+                        <button class"buttonPost" type="submit">Post</button>
                     </form>
                     ${deleteButton}
                     <button onclick="followUser(${post.user_id})">Follow</button>
@@ -190,6 +190,10 @@ function redirectUpload(){
 
 function redirectFeed(){
     window.location.href = '/feed';
+}
+
+function redirectDashboard(){
+    window.location.href = '/dashboard';
 }
 
 async function uploadPost() {
@@ -296,9 +300,6 @@ async function deletePost(postId) {
     }
 }
 
-
-
-
 async function signup() {
     const username = document.getElementById('inputUsername').value;
     const password = document.getElementById('inputPassword').value;
@@ -375,20 +376,3 @@ async function userFeed(){
         document.getElementById("posts-container").append(data);
     })
 }
-
-// async function unfollowUser(userId) {
-//     try {
-//         const response = await fetch(`/unfollow/${userId}`, {
-//             method: 'POST',
-//         });
-
-//         if (!response.ok) {
-//             throw new Error('Network response was not ok');
-//         }
-
-//         // Reload the feed after unfollowing a user
-//         renderPost();
-//     } catch (error) {
-//         console.error('Error unfollowing user:', error.message);
-//     }
-// }
