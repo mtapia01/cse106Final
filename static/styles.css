@@ -31,7 +31,7 @@ button{
     width: 80px;
 }
 button:hover{
-    background-color: #d4a373;
+    background-color: #48778f;
     cursor:pointer;
 }
 
@@ -67,7 +67,7 @@ p{
     justify-content: space-between;
     align-items: center;
     padding: 8px;
-    background-color: #6f432a;
+    background-color: #df4343;
 }
 
 .header-buttons {
