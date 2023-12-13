@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<!-- dashboard.html -->
-
-{% include 'header.html' %}
-
+    {% include 'header.html' %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitsagram</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='feedStyles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navbar.css') }}">
 </head>
 
-<body>
+<body class="fontMain" style="background-color: #D7D6D6;">
+    <!-- <button id="navbarButton" onclick="redirectDashboard()">Back to Dashboard</button> -->
 
     <h3>People You Follow:</h3>
 

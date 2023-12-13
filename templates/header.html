@@ -1,12 +1,13 @@
 <!-- header.html -->
 
 <div class="header">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navbar.css') }}">
     <div class="header-buttons">
         <!-- Add any other header content here -->
-        <button onclick="redirectDashboard()">Dashboard</button>
-        <button onclick="redirectFeed()">Feed</button>
-        <button onclick="redirectUpload()">Create Post</button>
-        <button onclick="redirectFollowers()">View Followers</button>
+        <button class="buttonPost" onclick="redirectDashboard()">Dashboard</button>
+        <button class="buttonPost" onclick="redirectFeed()">Feed</button>
+        <button class="buttonPost" onclick="redirectUpload()">Create Post</button>
+        <button class="buttonPost" onclick="redirectFollowers()">View Followers</button>
     </div>
     <div class="header-buttons">
         <button onclick="signOut()">Sign Out</button>

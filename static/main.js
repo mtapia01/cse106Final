@@ -85,7 +85,7 @@ async function renderExplore(){
                     <form onsubmit="addComment(${post.id}); return false;">
                         <label for="comment">Add Comment:</label>
                         <input type="text" name="comment" required>
-                        <button type="submit">Post</button>
+                        <button class"buttonPost" type="submit">Post</button>
                     </form>
                     ${deleteButton}
                     <button onclick="followUser(${post.user_id})">Follow</button>
@@ -187,6 +187,10 @@ function redirectUpload(){
 
 function redirectFeed(){
     window.location.href = '/feed';
+}
+
+function redirectDashboard(){
+    window.location.href = '/dashboard';
 }
 
 async function uploadPost() {
@@ -292,9 +296,6 @@ async function deletePost(postId) {
         console.error('Error deleting post:', error.message);
     }
 }
-
-
-
 
 async function signup() {
     const username = document.getElementById('inputUsername').value;

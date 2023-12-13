@@ -14,15 +14,16 @@
     <br>
 
     <div class="center downPadding" id="rcorners1">
-        <button class="center pad spacing" onclick="redirectFeed()">View Feed</button>
+
+        <button class="center pad spacing buttonPost" onclick="redirectFeed()">View Feed</button>
         <br><br>
-        <button class="center" onclick="redirectUpload()">Create a Post</button>
+        <button class="center buttonPost" onclick="redirectUpload()">Create a Post</button>
         <br><br>
-        <button class="center" onclick="redirectFollowers()">View Followers</button>
+        <button class="center buttonPost" onclick="redirectFollowers()">View Followers</button>
         <br><br>
         <button class="center" onclick="redirectProfile()">View Profile</button> 
         <br><br>
-        <button class="center" onclick="signOut()">Sign Out</button>
+        <button class="center buttonPost" onclick="signOut()">Sign Out</button>
     </div>
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
@@ -41,7 +42,6 @@
         }
 
         function signOut() {
-            // Add logic to sign out the user (e.g., make an API call to the server)
             window.location.href = '/logout';  // Redirect to the logout route
         }
 

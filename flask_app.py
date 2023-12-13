@@ -199,7 +199,7 @@ def followers():
     return render_template('followers.html')
     
 @app.route('/add_comment', methods=['POST'])
-@login_required
+# @login_required
 def add_comment():
     try:
         data = request.get_json()
