@@ -1,7 +1,4 @@
-// Next steps: Work on feed. Add a sign out button and create post maybe at the top of the page as a nav bar?
 
-// window.onload = renderPost;
-// window.onload = renderExplore;
 
 window.addEventListener('load', renderPost);
 window.addEventListener('load', renderExplore);

@@ -5,7 +5,6 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
-from flask_migrate import Migrate
 import os
 
 UPLOAD_FOLDER = 'uploads'
@@ -15,15 +14,14 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Update with your database URI
-app.config['SECRET_KEY'] = 'key'  # Update with your secret key
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db' 
+app.config['SECRET_KEY'] = 'key' 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login' 
 app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png'}
 app.config['UPLOAD_FOLDER'] = './uploads/'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-migrate = Migrate(app, db)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png', 'gif'}
@@ -39,7 +37,7 @@ class Post(db.Model):
     image = db.Column(db.String(255))  # Store the file path or URL
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    likes = db.Column(db.Integer, nullable=False, default=0)  # Set default value to 0
+    likes = db.Column(db.Integer, nullable=False, default=0)  # Default 0
 
     def __repr__(self):
         return f"Post('{self.content}', '{self.date_posted}')"
@@ -64,9 +62,6 @@ class Follower(db.Model):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-# class Follower(db.Model):
-#     user_account = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     follower = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 followers = db.Table(
     'followers',
@@ -79,11 +74,10 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    #profile_pic = db.Column(db.String(255), nullable=True, default='ValleHS-06.jpg')
-    # posts = db.relationship('Post', backref='author', lazy=True)
+    profile_picture = db.Column(db.String(255), nullable=True, default='ValleHS-06.jpg')
 
     def get_id(self):
-        return str(self.id)  # Assuming `id` is your user ID field
+        return str(self.id) 
     #hashes password with salt
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
