@@ -14,7 +14,7 @@
     background-color: #BEB2C8;
     padding: 20px;
     width: 200px;
-    height: 200px;
+    height: 250px;
     text-align: center;
 }
 button{
@@ -67,7 +67,7 @@ p{
     justify-content: space-between;
     align-items: center;
     padding: 8px;
-    background-color: #df4343;
+    background-color: #c0a3c9;
 }
 
 .header-buttons {

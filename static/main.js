@@ -323,7 +323,11 @@ async function signup() {
         // Display the error message to the user
         alert(error.message);
     }
+    
+    // Prevent the default form submission
+    return false;
 }
+
 
 
 async function login(){
